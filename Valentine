@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Will you be my Valentine ?</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=The+Youngest+Script&display=swap');
+    :root{
+      --bg1:#ffeef2; /* pale pink */
+      --bg2:#ffd1dc; /* light rose */
+      --accent:#ff4d6d; /* strong pink-red */
+      --accent-2:#ff7b9c; /* mid pink */
+      --white:#ffffff;
+      --card:#fff5f7;
+      --shadow: rgba(0,0,0,0.08);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(135deg,var(--bg1),var(--bg2));
+      color:#3b2b2b;
+      padding:24px;
+    }
+
+    .screen{width:100%;max-width:920px}
+    .card{
+      background: linear-gradient(180deg,var(--card),var(--white));
+      border-radius:18px;
+      padding:32px;
+      box-shadow: 0 10px 30px var(--shadow);
+      text-align:center;
+      border: 1px solid rgba(255,77,109,0.08);
+    }
+
+    h1{margin:0 0 10px;font-size:2.2rem;color:var(--accent)}
+    h2{margin:0 0 18px;color:var(--accent-2)}
+    .subtitle{color:#8a4754;margin-bottom:18px}
+
+    .buttons{display:flex;gap:16px;justify-content:center;margin-top:8px}
+    .btn{
+      background:var(--white);
+      border:2px solid rgba(255,77,109,0.14);
+      padding:12px 22px;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+      min-width:100px;
+      box-shadow: 0 6px 18px rgba(255,77,109,0.06);
+    }
+    .btn:active{transform:translateY(2px)}
+
+    .btn-yes{
+      background: linear-gradient(180deg,var(--accent),#ff86a3);
+      color:var(--white);
+      border:none;
+    }
+    .btn-no{
+      background: linear-gradient(180deg,#fff,#ffe7ee);
+      color:var(--accent-2);
+    }
+
+    .hint{font-size:0.9rem;color:#7a4b56;margin-top:14px}
+
+    .hidden{display:none}
+
+    /* gallery styles */
+    .gallery-card{padding:20px}
+    .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin:18px 0}
+    .gallery img{width:100%;height:120px;object-fit:cover;border-radius:10px;border:3px solid rgba(255,255,255,0.7);box-shadow:0 6px 14px rgba(0,0,0,0.06)}
+
+    .btn-continue{background:linear-gradient(180deg,#ff6f88,#ff3b6b);color:white;border:none;padding:12px 20px;border-radius:12px}
+
+    .final-card{
+      padding:28px;
+      font-family: 'The Youngest Script', cursive;
+    }
+    .message{font-size:1.05rem;color:#4a2730;line-height:1.45}
+
+    /* playful floating hearts */
+    .heart{position:fixed;pointer-events:none;opacity:0.85;z-index: 1010;will-change: transform, opacity;}
+
+    @media (max-width:520px){
+      h1{font-size:1.6rem}
+      .card{padding:20px}
+      .gallery img{height:100px}
+    }
+
+    /* Envelope styles */
+    .envelope-cover {
+      position:fixed;
+      top:0;left:0;right:0;bottom:0;
+      background:linear-gradient(135deg,#ffd1dc 60%,#fff5f7 100%);
+      z-index:1000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:opacity .6s;
+      perspective: 1200px;
+    }
+    .envelope-cover.hidden{display:none;opacity:0;}
+    .envelope-outer {
+      position:relative;
+      width:340px;
+      height:200px;
+      background:linear-gradient(180deg,#ffb6c1,#ff4d6d);
+      border-radius:12px;
+      box-shadow:0 10px 30px var(--shadow);
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .envelope-flap {
+      width:340px;
+      height:100px;
+      background:linear-gradient(180deg,#ff7b9c,#ff4d6d);
+      clip-path:polygon(0 0, 100% 0, 50% 100%);
+      position:absolute;
+      top:0;
+      left:0;
+      transform:rotateX(0deg);
+      z-index:2;
+      box-shadow:0 6px 18px rgba(255,77,109,0.12);
+      transition:transform 1s cubic-bezier(.77,0,.18,1);
+      transform-origin:top center;
+      cursor:pointer;
+    }
+    .envelope-flap.open {
+      transform:rotateX(180deg);
+      cursor:pointer;
+    }
+    .envelope-body {
+      width:340px;
+      height:200px;
+      background:linear-gradient(180deg,#ffb6c1,#ff4d6d);
+      border-radius:12px;
+      position:absolute;
+      top:0;
+      left:0;
+      z-index:1;
+      box-shadow:0 10px 30px var(--shadow);
+    }
+    .envelope-flap:hover {
+      cursor:pointer;
+    }
+    .card-container {
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%) scale(1);
+      z-index:1100;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      transition:opacity .6s, transform .6s;
+    }
+    .card-container .card {
+      margin:0 auto;
+      min-width:320px;
+      max-width:420px;
+      box-shadow:0 10px 30px var(--shadow);
+      opacity:1;
+      transform:scale(1);
+      transition:opacity .6s, transform .6s;
+    }
+    .card-container .card.hidden {
+      opacity:0;
+      transform:scale(0.95);
+      pointer-events:none;
+    }
+    .envelope-hearts {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 340px;
+      height: 200px;
+      pointer-events: none;
+      z-index: 1010;
+    }
+  </style>
+</head>
+<body>
+  <div id="envelope" class="envelope-cover">
+    <div class="envelope-outer">
+      <div class="envelope-flap" id="envelopeFlap"></div>
+      <div class="envelope-body"></div>
+      <div id="envelopeHearts" class="envelope-hearts"></div>
+      <div class="envelope-text">
+        <h2 style="color:#fff; font-family:'The Youngest Script',cursive; font-size:2.2rem; margin-top:24px;">Will you be my Valentine?</h2>
+        <p style="color:#fff; font-size:1.1rem; margin-bottom:0;">Open the envelope to see what's inside!</p>
+      </div>
+    </div>
+  </div>
+  <div id="cardContainer" class="card-container hidden">
+    <!-- Cards will be shown here in order -->
+    <div class="card card-1 hidden">
+      <h1>Will you be my Valentine ?</h1>
+      <p class="subtitle"><span style="color:#663e45;font-size:1.1rem;">I made this for Pimmy ของเค้า 🩵</span></p>
+      <div class="buttons" id="buttonRow" aria-live="polite">
+        <button id="yesBtn" class="btn btn-yes">Yes</button>
+        <button id="noBtn" class="btn btn-no">No</button>
+      </div>
+      <p class="hint">กด YES เร็ววว</p>
+    </div>
+    <div class="card card-2 hidden">
+      <h2>It's been a while since we last met</h2>
+      <p class="subtitle">Not even a week but it felt so longgggg</p>
+      <div class="gallery" id="galleryGrid">
+        <img src="DSC00120.JPG" alt="photo 1">
+        <img src="pimmy 02.jpg" alt="photo 2">
+        <img src="pimmy03.jpg" alt="photo 3">
+        <img src="pimmy04.jpg" alt="photo 4">
+        <img src="pimmy05.jpg" alt="photo 5">
+        <img src="pimmy06.jpg" alt="photo 6">
+      </div>
+      <button id="continueBtn" class="btn btn-continue">Continue</button>
+    </div>
+    <div class="card final-card card-3 hidden">
+      <h2>Happy Valentine's Day !</h2>
+      <p class="message"> Happy Valentine's Day, Pimmy! I'm so proud of you for chasing your dreams in Milan. Even though we're miles apart, my heart is right there hehe. Enjoy Italy, and just know I'm counting down the days until you're back in Thailand. Love you Naaa 💌</p>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const envelope = document.getElementById('envelope');
+      const envelopeFlap = document.getElementById('envelopeFlap');
+      const cardContainer = document.getElementById('cardContainer');
+      const card1 = document.querySelector('.card-1');
+      const card2 = document.querySelector('.card-2');
+      const card3 = document.querySelector('.card-3');
+      const yesBtn = document.getElementById('yesBtn');
+      const noBtn = document.getElementById('noBtn');
+      const buttonRow = document.getElementById('buttonRow');
+      const continueBtn = document.getElementById('continueBtn');
+      const envelopeHearts = document.getElementById('envelopeHearts');
+
+      // Show hearts on envelope page
+      function showEnvelopeHearts() {
+        envelopeHearts.innerHTML = '';
+        for(let i=0;i<8;i++){
+          const heart = document.createElement('div');
+          heart.className = 'heart';
+          heart.innerHTML = '❤️';
+          const size = Math.floor(Math.random()*28)+18;
+          heart.style.fontSize = size+'px';
+          heart.style.position = 'absolute';
+          heart.style.left = (Math.random()*80+5) + '%';
+          heart.style.top = (Math.random()*60+10) + '%';
+          heart.style.opacity = (Math.random()*0.4+0.6);
+          envelopeHearts.appendChild(heart);
+          const dy = Math.random()*80 + 40;
+          heart.animate([
+            { transform: 'translateZ(0px) scale(1)', opacity: heart.style.opacity },
+            { transform: `translateY(-${dy}px) translateZ(60px) scale(1.12)`, opacity: 0 }
+          ], { duration: 3000+Math.random()*3000, easing: 'ease-out', iterations:1 });
+          setTimeout(()=> heart.remove(), 3500 + Math.random()*3000);
+        }
+      }
+      // Show hearts on card 1
+      function showCard1Hearts() {
+        spawnHearts(8);
+      }
+      // Show hearts on card 2
+      function showCard2Hearts() {
+        spawnHearts(8);
+      }
+      // Remove hearts
+      function removeHearts() {
+        document.querySelectorAll('.heart').forEach(h => h.remove());
+      }
+
+      // Envelope opens on mouseover
+      envelopeFlap.addEventListener('mouseenter',()=>{
+        envelopeFlap.classList.add('open');
+        showEnvelopeHearts();
+      });
+      envelopeFlap.addEventListener('mouseleave',()=>{
+        envelopeFlap.classList.remove('open');
+        envelopeHearts.innerHTML = '';
+      });
+      envelopeFlap.addEventListener('click',()=>{
+        envelope.classList.add('hidden');
+        cardContainer.classList.remove('hidden');
+        card1.classList.remove('hidden');
+        showCard1Hearts();
+      });
+
+      // Swap Yes/No buttons
+      function swapButtons(){
+        const yesNext = yesBtn.nextElementSibling === noBtn;
+        if(yesNext){
+          buttonRow.insertBefore(noBtn, yesBtn);
+        } else {
+          buttonRow.insertBefore(yesBtn, noBtn);
+        }
+        yesBtn.animate([
+          { transform: 'translateY(-6px)' },
+          { transform: 'translateY(0)' }
+        ], { duration: 220, easing: 'ease-out' });
+      }
+      noBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        swapButtons();
+      });
+      noBtn.addEventListener('mouseenter', () => {
+        swapButtons();
+      });
+      noBtn.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          swapButtons();
+        }
+      });
+
+      // Yes: show second card
+      yesBtn.addEventListener('click', () => {
+        card1.classList.add('hidden');
+        card2.classList.remove('hidden');
+        removeHearts();
+        showCard2Hearts();
+      });
+      // Continue: show third card
+      continueBtn.addEventListener('click', () => {
+        card2.classList.add('hidden');
+        card3.classList.remove('hidden');
+        removeHearts();
+      });
+
+      // Floating hearts generator
+      function spawnHearts(count = 8){
+        for(let i=0;i<count;i++){
+          const heart = document.createElement('div');
+          heart.className = 'heart';
+          heart.innerHTML = '❤️';
+          const size = Math.floor(Math.random()*28)+18;
+          heart.style.fontSize = size+'px';
+          heart.style.left = (Math.random()*80+5) + '%';
+          heart.style.top = (Math.random()*60+10) + '%';
+          heart.style.opacity = (Math.random()*0.4+0.6);
+          document.body.appendChild(heart);
+          const dy = Math.random()*80 + 40;
+          heart.animate([
+            { transform: 'translateY(0) scale(1)', opacity: heart.style.opacity },
+            { transform: `translateY(-${dy}px) scale(1.12)`, opacity: 0 }
+          ], { duration: 3000+Math.random()*3000, easing: 'ease-out', iterations:1 });
+          setTimeout(()=> heart.remove(), 3500 + Math.random()*3000);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
